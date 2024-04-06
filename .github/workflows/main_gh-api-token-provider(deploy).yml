@@ -42,10 +42,6 @@ jobs:
           tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_2023968A5320455E886F66F5FF246C04 }}
           subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_82CD3A95782A4865B606FFE0A7CC99F4 }}
 
-      - name: "Sleep for 30 seconds"
-        shell: pwsh
-        run: Start-Sleep -s 30
-
       - name: "Run Azure Functions Action"
         uses: Azure/functions-action@v1
         id: fa
