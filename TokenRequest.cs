@@ -7,15 +7,10 @@ using Azure.Security.KeyVault.Secrets;
 
 namespace gh_api_token_provider
 {
-    public class TokenRequest
+    public class TokenRequest(ILoggerFactory loggerFactory)
     {
-        private readonly ILogger _logger;
+        private readonly ILogger _logger = loggerFactory.CreateLogger<TokenRequest>();
         private HttpResponseData _response = null!;
-
-        public TokenRequest(ILoggerFactory loggerFactory)
-        {
-            _logger = loggerFactory.CreateLogger<TokenRequest>();
-        }
 
         [Function("TokenRequest")]
         public void Run([HttpTrigger(AuthorizationLevel.Anonymous, "get")] HttpRequestData req)
