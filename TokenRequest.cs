@@ -13,47 +13,42 @@ namespace gh_api_token_provider
         private HttpResponseData _response = null!;
 
         [Function("TokenRequest")]
-        public void Run([HttpTrigger(AuthorizationLevel.Anonymous, "get")] HttpRequestData req)
+        public HttpResponseData Run([HttpTrigger(AuthorizationLevel.Anonymous, "get")] HttpRequestData req)
         {
 
             bool isLocalDevelopment = Convert.ToBoolean(Environment.GetEnvironmentVariable("IsLocalDevelopment") ?? "false");
 
-            if (isLocalDevelopment) SendLocal(req);
+            if (isLocalDevelopment)
+            {
+                _response = req.CreateResponse(HttpStatusCode.OK);
+                _response.Headers.Add("Content-Type", "text/plain; charset=utf-8");
 
-            SendToken(req);
-        }
+                _response.WriteString("Local development");
 
-        private HttpResponseData SendLocal(HttpRequestData req)
-        {
-            _response = req.CreateResponse(HttpStatusCode.OK);
-            _response.Headers.Add("Content-Type", "text/plain; charset=utf-8");
+                return _response;
+            }
+            else
+            {
+                _logger.LogInformation("C# HTTP trigger function processed a request.");
 
-            _response.WriteString("Local development");
+                string keyVaultName = "gh-api-tokens";
+                string secretName = "GhApiToken";
+                string keyVaultUri = $"https://{keyVaultName}.vault.azure.net/";
 
-            return _response;
-        }
+                SecretClient client = new(new Uri(keyVaultUri), new DefaultAzureCredential());
 
-        private HttpResponseData SendToken(HttpRequestData req)
-        {
-            _logger.LogInformation("C# HTTP trigger function processed a request.");
+                var secret = client.GetSecret(secretName);
 
-            string keyVaultName = "gh-api-tokens";
-            string secretName = "GhApiToken";
-            string keyVaultUri = $"https://{keyVaultName}.vault.azure.net/";
+                byte[] decodedData = Convert.FromBase64String(secret.Value.Value);
+                string decodedString = System.Text.Encoding.UTF8.GetString(decodedData);
 
-            SecretClient client = new(new Uri(keyVaultUri), new DefaultAzureCredential());
+                _response = req.CreateResponse(HttpStatusCode.OK);
+                _response.Headers.Add("Content-Type", "text/plain; charset=utf-8");
 
-            var secret = client.GetSecret(secretName);
+                _response.WriteString(decodedString);
 
-            byte[] decodedData = Convert.FromBase64String(secret.Value.Value);
-            string decodedString = System.Text.Encoding.UTF8.GetString(decodedData);
-
-            _response = req.CreateResponse(HttpStatusCode.OK);
-            _response.Headers.Add("Content-Type", "text/plain; charset=utf-8");
-
-            _response.WriteString(decodedString);
-
-            return _response;
+                return _response;
+            }
         }
     }
 }
