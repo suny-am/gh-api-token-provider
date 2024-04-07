@@ -15,36 +15,30 @@ namespace gh_api_token_provider
         [Function("TokenRequest")]
         public HttpResponseData Run([HttpTrigger(AuthorizationLevel.Anonymous, "get")] HttpRequestData req)
         {
+            string? SecretName = Environment.GetEnvironmentVariable("SECRET", EnvironmentVariableTarget.Process);
+            string? KeyVaultUri = Environment.GetEnvironmentVariable("KEY_VAULT_URI", EnvironmentVariableTarget.Process);
 
-            bool isLocalDevelopment = Convert.ToBoolean(Environment.GetEnvironmentVariable("IsLocalDevelopment") ?? "false");
-
-            if (isLocalDevelopment)
+            if (SecretName is null || KeyVaultUri is null)
             {
-                _response = req.CreateResponse(HttpStatusCode.OK);
+                _logger.LogError("Could not load settings for Secretname:[{secretName}], KeyVaultUri:[{keyVaultUri}]", SecretName, KeyVaultUri);
+                _response = req.CreateResponse(HttpStatusCode.FailedDependency);
                 _response.Headers.Add("Content-Type", "text/plain; charset=utf-8");
-
-                _response.WriteString("Local development");
-
+                _response.WriteString("Could not load settings");
                 return _response;
             }
             else
             {
                 _logger.LogInformation("C# HTTP trigger function processed a request.");
 
-                string keyVaultName = "gh-api-tokens";
-                string secretName = "GhApiToken";
-                string keyVaultUri = $"https://{keyVaultName}.vault.azure.net/";
+                SecretClient client = new(new Uri(KeyVaultUri!), new DefaultAzureCredential());
 
-                SecretClient client = new(new Uri(keyVaultUri), new DefaultAzureCredential());
-
-                var secret = client.GetSecret(secretName);
+                var secret = client.GetSecret(SecretName);
 
                 byte[] decodedData = Convert.FromBase64String(secret.Value.Value);
                 string decodedString = System.Text.Encoding.UTF8.GetString(decodedData);
 
                 _response = req.CreateResponse(HttpStatusCode.OK);
                 _response.Headers.Add("Content-Type", "text/plain; charset=utf-8");
-
                 _response.WriteString(decodedString);
 
                 return _response;

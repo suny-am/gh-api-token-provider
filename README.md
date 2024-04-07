@@ -5,9 +5,11 @@
 A small Azure Function C# application for providing tokens
 to be used with the Github API
 
-## Endpoint
-[link](https://gh-api-token-provider.azurewebsites.net/api/tokenrequest)
+# Requirements
+- Azure Keyvault storage (Stores Github Access token)
+- Azure Function App (Runs the application on HttpTrigger on endpoint)
+- Have the KEY_VAULT_URI and SECRET_NAME values added to the application settings.
 
-## Resources
-
-[Azure Functions Quickstart](https://learn.microsoft.com/en-us/azure/azure-functions/create-first-function-cli-csharp?tabs=linux%2Cazure-cli#install-the-azure-functions-core-tools)
+# Security
+It is recommended you restrict access and apply CORS for the function app to only the origin that is to request
+the token. 
