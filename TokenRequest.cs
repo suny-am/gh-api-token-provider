@@ -15,12 +15,12 @@ namespace gh_api_token_provider
         [Function("TokenRequest")]
         public HttpResponseData Run([HttpTrigger(AuthorizationLevel.Anonymous, "get")] HttpRequestData req)
         {
-            string? SecretName = Environment.GetEnvironmentVariable("SECRET", EnvironmentVariableTarget.Process);
-            string? KeyVaultUri = Environment.GetEnvironmentVariable("KEY_VAULT_URI", EnvironmentVariableTarget.Process);
+            string? secretName = Environment.GetEnvironmentVariable("SECRET", EnvironmentVariableTarget.Process);
+            string? keyVaultUri = Environment.GetEnvironmentVariable("KEY_VAULT_URI", EnvironmentVariableTarget.Process);
 
-            if (SecretName is null || KeyVaultUri is null)
+            if (secretName is null || keyVaultUri is null)
             {
-                _logger.LogError("Could not load settings for Secretname:[{secretName}], KeyVaultUri:[{keyVaultUri}]", SecretName, KeyVaultUri);
+                _logger.LogError("Could not load settings for SecretName:[{secretName}], KeyVaultUri:[{keyVaultUri}]", secretName, keyVaultUri);
                 _response = req.CreateResponse(HttpStatusCode.FailedDependency);
                 _response.Headers.Add("Content-Type", "text/plain; charset=utf-8");
                 _response.WriteString("Could not load settings");
@@ -30,9 +30,9 @@ namespace gh_api_token_provider
             {
                 _logger.LogInformation("C# HTTP trigger function processed a request.");
 
-                SecretClient client = new(new Uri(KeyVaultUri!), new DefaultAzureCredential());
+                SecretClient client = new(new Uri(keyVaultUri!), new DefaultAzureCredential());
 
-                var secret = client.GetSecret(SecretName);
+                var secret = client.GetSecret(secretName);
 
                 byte[] decodedData = Convert.FromBase64String(secret.Value.Value);
                 string decodedString = System.Text.Encoding.UTF8.GetString(decodedData);
