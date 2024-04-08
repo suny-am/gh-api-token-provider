@@ -17,7 +17,6 @@ namespace gh_api_token_provider
         {
             string? secretName = Environment.GetEnvironmentVariable("SECRET_NAME", EnvironmentVariableTarget.Process);
             string? keyVaultUri = Environment.GetEnvironmentVariable("KEY_VAULT_URI", EnvironmentVariableTarget.Process);
-            string? managedIdentityId = Environment.GetEnvironmentVariable("MANAGED_IDENTITY_ID", EnvironmentVariableTarget.Process);
 
             if (secretName is null || keyVaultUri is null)
             {
@@ -33,9 +32,7 @@ namespace gh_api_token_provider
 
                 // When deployed to an azure host, the default azure credential will authenticate the specified user assigned managed identity.
 
-                var credential = new DefaultAzureCredential(new DefaultAzureCredentialOptions { ManagedIdentityClientId = managedIdentityId });
-
-                SecretClient client = new(new Uri(keyVaultUri!), credential);
+                SecretClient client = new(new Uri(keyVaultUri!), new DefaultAzureCredential());
 
                 var secret = client.GetSecret(secretName);
 
