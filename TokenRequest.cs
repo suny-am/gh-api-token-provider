@@ -15,7 +15,7 @@ namespace gh_api_token_provider
         [Function("TokenRequest")]
         public HttpResponseData Run([HttpTrigger(AuthorizationLevel.Anonymous, "get")] HttpRequestData req)
         {
-            string? secretName = Environment.GetEnvironmentVariable("SECRET", EnvironmentVariableTarget.Process);
+            string? secretName = Environment.GetEnvironmentVariable("SECRET_NAME", EnvironmentVariableTarget.Process);
             string? keyVaultUri = Environment.GetEnvironmentVariable("KEY_VAULT_URI", EnvironmentVariableTarget.Process);
 
             if (secretName is null || keyVaultUri is null)
