@@ -5,15 +5,15 @@ using Microsoft.Extensions.Logging;
 using Azure.Identity;
 using Azure.Security.KeyVault.Secrets;
 
-namespace gh_api_token_provider
+namespace GhApiTokenProvider
 {
-    public class TokenRequest(ILoggerFactory loggerFactory)
+    public class TokenProvider(ILoggerFactory loggerFactory)
     {
-        private readonly ILogger _logger = loggerFactory.CreateLogger<TokenRequest>();
+        private readonly ILogger _logger = loggerFactory.CreateLogger<TokenProvider>();
         private HttpResponseData _response = null!;
 
         [Function("TokenRequest")]
-        public HttpResponseData Run([HttpTrigger(AuthorizationLevel.Anonymous, "get")] HttpRequestData req)
+        public HttpResponseData Run([HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "token")] HttpRequestData req)
         {
             string? secretName = Environment.GetEnvironmentVariable("SECRET_NAME", EnvironmentVariableTarget.Process);
             string? keyVaultUri = Environment.GetEnvironmentVariable("KEY_VAULT_URI", EnvironmentVariableTarget.Process);
