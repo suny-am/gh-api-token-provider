@@ -37,7 +37,7 @@ namespace GhApiTokenProvider
                 var secret = client.GetSecret(secretName);
 
                 byte[] decodedData = Convert.FromBase64String(secret.Value.Value);
-                string decodedString = System.Text.Encoding.UTF8.GetString(decodedData);
+                string decodedString = System.Text.Encoding.UTF8.GetString(decodedData).Trim();
 
                 _response = req.CreateResponse(HttpStatusCode.OK);
                 _response.Headers.Add("Content-Type", "text/plain; charset=utf-8");
